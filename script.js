@@ -15,11 +15,9 @@ function calculateBill() {
         }
     }
 
-    const RATE_PER_UNIT = 9.65;
-    const FREE_UNITS = 100;
-
-    const biMonthlyBill = calculateBiMonthlyBill(usage, RATE_PER_UNIT, FREE_UNITS);
-    const monthlyBill = calculateMonthlyBill(usage, RATE_PER_UNIT, FREE_UNITS);
+    // Use the provided unit-based calculation
+    const biMonthlyBill = calculateBiMonthlyBill(usage);
+    const monthlyBill = calculateMonthlyBill(usage);
     const savings = monthlyBill - biMonthlyBill;
     const percentageSavings = (savings / monthlyBill) * 100;
 
@@ -33,21 +31,33 @@ function calculateBill() {
     `;
 }
 
-function calculateBiMonthlyBill(usage, ratePerUnit, freeUnits) {
+function calculateBiMonthlyBill(usage) {
     let totalBill = 0;
     for (let i = 0; i < usage.length; i += 2) {
         const biMonthlyUsage = usage[i] + (usage[i + 1] || 0);
-        const chargeableUnits = Math.max(0, biMonthlyUsage - freeUnits);
-        totalBill += chargeableUnits * ratePerUnit;
+        totalBill += calculateBillForUnits(biMonthlyUsage);
     }
     return totalBill;
 }
 
-function calculateMonthlyBill(usage, ratePerUnit, freeUnits) {
+function calculateMonthlyBill(usage) {
     let totalBill = 0;
     for (const monthlyUsage of usage) {
-        const chargeableUnits = Math.max(0, monthlyUsage - freeUnits);
-        totalBill += chargeableUnits * ratePerUnit;
+        totalBill += calculateBillForUnits(monthlyUsage);
     }
     return totalBill;
+}
+
+function calculateBillForUnits(units) {
+    let billAmount = 0;
+    if (units <= 100) {
+        billAmount = units * 1.5;
+    } else if (units <= 200) {
+        billAmount = (100 * 1.5) + ((units - 100) * 2.5);
+    } else if (units <= 300) {
+        billAmount = (100 * 1.5) + (100 * 2.5) + ((units - 200) * 4);
+    } else {
+        billAmount = (100 * 1.5) + (100 * 2.5) + (100 * 4) + ((units - 300) * 6);
+    }
+    return billAmount;
 }
